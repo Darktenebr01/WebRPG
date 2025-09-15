@@ -99,6 +99,11 @@ const GameInterface = ({ onBack }) => {
     </div>
   );
 
+  // Show battle system if battle tab is active
+  if (showBattle) {
+    return <BattleSystem onBack={() => setShowBattle(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#0f0f10]">
       {/* Header */}
