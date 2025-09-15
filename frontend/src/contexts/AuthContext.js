@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -16,70 +17,52 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check for existing session
-    const savedUser = localStorage.getItem('gameUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      const token = localStorage.getItem('auth_token');
+      const savedUser = localStorage.getItem('user');
+      
+      if (token && savedUser) {
+        try {
+          // Verify token is still valid
+          const currentUser = await authAPI.getCurrentUser();
+          setUser(currentUser);
+        } catch (error) {
+          // Token is invalid, clear storage
+          authAPI.logout();
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
-    // Check for admin credentials
-    if (email === 'Olti1992@gmail.com' && password === 'OltiL1752s!') {
-      const adminUser = {
-        id: 'admin-001',
-        email: email,
-        username: 'AdminOlti',
-        level: 99,
-        experience: 999999,
-        coins: 999999,
-        gems: 999,
-        isAdmin: true,
-        adminRole: 'Super Admin'
-      };
-      setUser(adminUser);
-      localStorage.setItem('gameUser', JSON.stringify(adminUser));
-      return adminUser;
+    try {
+      const response = await authAPI.login({ email, password });
+      setUser(response.user);
+      return response.user;
+    } catch (error) {
+      throw new Error(error.response?.data?.detail || 'Login failed');
     }
-
-    // Mock login for regular users
-    const mockUser = {
-      id: Date.now(),
-      email: email,
-      username: email.split('@')[0],
-      level: 25,
-      experience: 75640,
-      coins: 12450,
-      gems: 89,
-      isAdmin: false
-    };
-
-    setUser(mockUser);
-    localStorage.setItem('gameUser', JSON.stringify(mockUser));
-    return mockUser;
   };
 
   const register = async (email, password, username) => {
-    // Mock registration
-    const mockUser = {
-      id: Date.now(),
-      email: email,
-      username: username,
-      level: 1,
-      experience: 0,
-      coins: 100,
-      gems: 10,
-      isAdmin: false
-    };
-
-    setUser(mockUser);
-    localStorage.setItem('gameUser', JSON.stringify(mockUser));
-    return mockUser;
+    try {
+      const newUser = await authAPI.register({ email, password, username });
+      // Auto-login after registration
+      const loginResponse = await authAPI.login({ email, password });
+      setUser(loginResponse.user);
+      return loginResponse.user;
+    } catch (error) {
+      throw new Error(error.response?.data?.detail || 'Registration failed');
+    }
   };
 
   const logout = () => {
+    authAPI.logout();
     setUser(null);
-    localStorage.removeItem('gameUser');
   };
 
   const value = {
