@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useGame } from '../contexts/GameContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useStamina } from '../contexts/StaminaContext';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import BattleSystem from './BattleSystem';
+import StaminaDisplay from './StaminaDisplay';
 import {
   ArrowLeft,
   Sword,
@@ -23,6 +25,7 @@ import {
 
 const GameInterface = ({ onBack }) => {
   const { user } = useAuth();
+  const { stamina, maxStamina, getFormattedTimeUntilRegen } = useStamina();
   const {
     playerEquipment,
     playerInventory,
@@ -125,10 +128,7 @@ const GameInterface = ({ onBack }) => {
               <Gem className="w-4 h-4" />
               <span className="text-sm font-medium">{playerStats.gems}</span>
             </div>
-            <div className="flex items-center space-x-2 text-green-400">
-              <Heart className="w-4 h-4" />
-              <span className="text-sm font-medium">{playerStats.stamina}/{playerStats.maxStamina}</span>
-            </div>
+            <StaminaDisplay variant="compact" />
           </div>
         </div>
       </header>
@@ -180,13 +180,11 @@ const GameInterface = ({ onBack }) => {
                   </div>
                   <span className="text-white font-medium">{totalDefense}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-2">
-                    <Zap className="w-4 h-4 text-green-400" />
-                    <span className="text-gray-400">Stamina</span>
-                  </div>
-                  <span className="text-white font-medium">{playerStats.stamina}/{playerStats.maxStamina}</span>
-                </div>
+              </div>
+
+              {/* Stamina Display */}
+              <div className="mt-6">
+                <StaminaDisplay />
               </div>
 
               {/* Equipped Pets */}

@@ -5,6 +5,7 @@ import axios from "axios";
 import LoginPage from "./components/LoginPage";
 import GameDashboard from "./components/GameDashboard";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { StaminaProvider } from "./contexts/StaminaContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -40,7 +41,9 @@ function App() {
   return (
     <div className="App">
       <AuthProvider>
-        <AppContent />
+        <StaminaProvider>
+          <AppContent />
+        </StaminaProvider>
       </AuthProvider>
     </div>
   );

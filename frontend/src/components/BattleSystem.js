@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../contexts/GameContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useStamina } from '../contexts/StaminaContext';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -21,12 +22,12 @@ import {
 const BattleSystem = ({ onBack }) => {
   const { user } = useAuth();
   const { playerStats, calculateTotalStats } = useGame();
+  const { stamina, maxStamina, useStaminaForAttack } = useStamina();
   const [selectedBattle, setSelectedBattle] = useState(null);
   const [battleState, setBattleState] = useState('selection'); // 'selection', 'lobby', 'combat'
   const [userJoinedBattle, setUserJoinedBattle] = useState(false);
   const [battleTimer, setBattleTimer] = useState(0);
   const [playerDamage, setPlayerDamage] = useState(0);
-  const [usedStamina, setUsedStamina] = useState(0);
 
   const { totalAttack } = calculateTotalStats();
 
@@ -170,18 +171,16 @@ const BattleSystem = ({ onBack }) => {
     setBattleState('combat');
     setBattleTimer(0);
     setPlayerDamage(0);
-    setUsedStamina(0);
   };
 
   const handleSkillAttack = (skill) => {
-    if (playerStats.stamina < skill.staminaCost + usedStamina) {
+    if (skill.staminaCost > 0 && !useStaminaForAttack(skill.staminaCost)) {
       alert('Not enough stamina!');
       return;
     }
 
     const damage = Math.floor(skill.damage + (Math.random() * skill.damage * 0.3));
     setPlayerDamage(prev => prev + damage);
-    setUsedStamina(prev => prev + skill.staminaCost);
 
     // Update battle HP
     setBattles(prevBattles => 
@@ -270,7 +269,7 @@ const BattleSystem = ({ onBack }) => {
                   <div className="space-y-2 text-sm text-gray-300">
                     <div>Exp & Gold Rewards up to LV 100</div>
                     <div className="text-yellow-400">Your Damage: {playerDamage.toLocaleString()} DMG</div>
-                    {usedStamina >= playerStats.stamina * 0.8 && (
+                    {stamina < maxStamina * 0.2 && (
                       <div className="text-orange-400 flex items-center justify-center">
                         <span className="mr-2">⚠️</span>
                         Low stamina! Extra damage won't increase your EXP share.
@@ -290,12 +289,12 @@ const BattleSystem = ({ onBack }) => {
                       <Button
                         key={index}
                         onClick={() => handleSkillAttack(skill)}
-                        disabled={playerStats.stamina < skill.staminaCost + usedStamina}
+                        disabled={stamina < skill.staminaCost}
                         className={`p-4 text-left ${
                           skill.staminaCost === 0 
                             ? 'bg-blue-600 hover:bg-blue-700' 
                             : 'bg-purple-600 hover:bg-purple-700'
-                        } ${playerStats.stamina < skill.staminaCost + usedStamina ? 'opacity-50' : ''}`}
+                        } ${stamina < skill.staminaCost ? 'opacity-50' : ''}`}
                       >
                         <div className="font-medium">{skill.name}</div>
                         {skill.staminaCost > 0 && (

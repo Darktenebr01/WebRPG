@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useStamina } from '../contexts/StaminaContext';
 import { GameProvider } from '../contexts/GameContext';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import GameInterface from './GameInterface';
+import StaminaDisplay from './StaminaDisplay';
 import {
   Search,
   User,
@@ -26,6 +28,7 @@ import {
 
 const GameDashboard = () => {
   const { user, logout } = useAuth();
+  const { stamina, maxStamina, getFormattedTimeUntilRegen } = useStamina();
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfile, setShowProfile] = useState(false);
   const [showGame, setShowGame] = useState(false);
@@ -113,6 +116,7 @@ You can farm +2 stamina once per chapter. Capped at 1000 stamina / day
               <Gem className="w-4 h-4" />
               <span className="text-sm font-medium">{gameData.playerStats.gems}</span>
             </div>
+            <StaminaDisplay variant="compact" />
 
             {/* Profile */}
             <div className="flex items-center space-x-2">
@@ -245,6 +249,9 @@ You can farm +2 stamina once per chapter. Capped at 1000 stamina / day
                 <Zap className="w-8 h-8 text-purple-400" />
               </div>
             </Card>
+
+            {/* Stamina Display */}
+            <StaminaDisplay />
           </div>
         </div>
       </main>
