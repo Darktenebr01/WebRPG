@@ -35,6 +35,7 @@ const GameInterface = ({ onBack }) => {
   } = useGame();
 
   const [activeTab, setActiveTab] = useState('equipment');
+  const [showBattle, setShowBattle] = useState(false);
   const { totalAttack, totalDefense } = calculateTotalStats();
 
   const rarityColors = {
