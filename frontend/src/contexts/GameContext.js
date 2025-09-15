@@ -44,29 +44,34 @@ export const GameProvider = ({ children }) => {
 
   // Initialize with some starting equipment
   useEffect(() => {
-    const startingEquipment = {
-      weapon: equipmentData.weapons[0], // Rusty sword
-      armor: equipmentData.armor[0], // Torn leather armor
-      boots: equipmentData.boots[0], // Worn boots
-      gloves: equipmentData.gloves[0] // Worn gloves
-    };
+    // Only initialize if data is available
+    if (equipmentData && petData) {
+      const startingEquipment = {
+        weapon: equipmentData.weapons?.[0] || null, // Rusty sword
+        armor: equipmentData.armor?.[0] || null, // Torn leather armor
+        boots: equipmentData.boots?.[0] || null, // Worn boots
+        gloves: equipmentData.gloves?.[0] || null // Worn gloves
+      };
 
-    const startingInventory = [
-      equipmentData.weapons[1], // Magic wand
-      equipmentData.helmets[0], // Leather cap
-      equipmentData.helmets[1], // Bronze helmet
-      equipmentData.rings[0] // Power ring
-    ];
+      const startingInventory = [
+        equipmentData.weapons?.[1], // Magic wand
+        equipmentData.helmets?.[0], // Leather cap
+        equipmentData.helmets?.[1], // Bronze helmet
+        equipmentData.rings?.[0] // Power ring
+      ].filter(Boolean);
 
-    const startingPets = [
-      { ...petData.pets[0], isEquipped: true },
-      { ...petData.pets[1], isEquipped: false }
-    ];
+      const startingPets = [
+        { ...petData.pets?.[0], isEquipped: true },
+        { ...petData.pets?.[1], isEquipped: false }
+      ].filter(pet => pet.id);
 
-    setPlayerEquipment(startingEquipment);
-    setPlayerInventory(startingInventory);
-    setEquippedPets([startingPets[0]]);
-    setPetInventory(startingPets);
+      setPlayerEquipment(startingEquipment);
+      setPlayerInventory(startingInventory);
+      if (startingPets.length > 0) {
+        setEquippedPets([startingPets[0]]);
+        setPetInventory(startingPets);
+      }
+    }
   }, []);
 
   const calculateTotalStats = () => {
